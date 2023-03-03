@@ -60,43 +60,46 @@ public class AKS extends Thread
 		// TODO: Do this in linear time http://www.ams.org/journals/mcom/1998-67-223/S0025-5718-98-00952-1/S0025-5718-98-00952-1.pdf
 		// If ( n = a^b for a in natural numbers and b > 1), output COMPOSITE
 		
-		double[] time_result = new double[3];
+		double[] time_result = new double[5];
 		double start_time = System.nanoTime();
 
 
-		BigInteger base = BigInteger.valueOf(2);
+		BigInteger base = BigInteger.valueOf(2); // Crea un objeto BigInteger con valor 2 (se empieza la búsqueda por el 2)
 		BigInteger aSquared;
 		
 		do
 		{
 			BigInteger result;
 
-			int power = Math.max((int) (log()/log(base) - 2),1);
+			int power = Math.max((int) (log()/log(base) - 2),1); // Dentro del bucle externo. hace el max entre el entero resultante de la división entre log() "He buscado y literalmente
+			// no debería ser posible hacer eso así que no sé cuál es el parámetro que utiliza" y el logaritmo en base n de 2, a lo que resta 2.
 			int comparison;
 			
 			do
 			{
-				power++;
+				power++; //Bucle interno, se suma uno al power, se eleva la base a ese power, y se compara con el BigInteger result "De nuevo, result no debería ser nada, puesto que no se
+						 // le da valor alguno. Si n es mayor que result, comparison > 0.
 				result = base.pow(power);
 				comparison = n.compareTo(result);
 			}
-			while( comparison > 0 && power < Integer.MAX_VALUE );
+			while( comparison > 0 && power < Integer.MAX_VALUE ); 	// La condición para continuar en este bucle interno es que comparison sea positivo, y el power utilizado sea menor que
+																	// el número entero más grande que admite Java 2³¹-1
 			
-			if( comparison == 0 )
+			if( comparison == 0 ) // Si n y result son iguales, 
 			{
-				if (verbose) System.out.println(n + " is a perfect power of " + base);
-				factor = base;
+				if (verbose) System.out.println(n + " is a perfect power of " + base); // Potencia perfecta
+				factor = base; // 
 				n_isprime = false;
 				//return n_isprime;
 			}
 			
-			if (verbose) System.out.println(n + " is not a perfect power of " + base);
+			if (verbose) System.out.println(n + " is not a perfect power of " + base); // Termina el bucle interior, n no es potencia perfecta de la base
 
-			base = base.add(BigInteger.ONE);
-			aSquared = base.pow(2);
+			base = base.add(BigInteger.ONE); // suma 1 a la base
+			aSquared = base.pow(2);			 // aSquared = base²
 		}
-		while (aSquared.compareTo(this.n) <= 0);
-		if (verbose) System.out.println(n + " is not a perfect power of any integer less than its square root");
+		while (aSquared.compareTo(this.n) <= 0);  // Condición del bucle externo, el bucle continúa siempre y cuando el bigInteger "aSquared" sea menor o igual que n
+		if (verbose) System.out.println(n + " is not a perfect power of any integer less than its square root"); // Termina el bucle externo sin solución
 		
 		double end_time = System.nanoTime();
 		time_result[0] = end_time - start_time;
@@ -108,15 +111,15 @@ public class AKS extends Thread
 		// smallest positive integer k with	n^k = 1 (mod r).
 		double log = this.log();
 		double logSquared = log*log;
-		BigInteger k = BigInteger.ONE;
-		BigInteger r = BigInteger.ONE;
+		BigInteger k = BigInteger.ONE;	// k = 1
+		BigInteger r = BigInteger.ONE;	// r = 1
 		do
 		{
-			r = r.add(BigInteger.ONE);
+			r = r.add(BigInteger.ONE); // r += 1
 			if (verbose) System.out.println("trying r = " + r);
-			k = multiplicativeOrder(r);
+			k = multiplicativeOrder(r); // El entero más pequeño tal que n^r = 1 mod r
 		}
-		while( k.doubleValue() < logSquared );
+		while( k.doubleValue() < logSquared ); // Condición del bucle, si el float k es menor que el cuadrado del logaritmo, se sigue con el bucle
 		if (verbose) System.out.println("r is " + r);
 
 		end_time = System.nanoTime();
@@ -124,11 +127,11 @@ public class AKS extends Thread
 		start_time = System.nanoTime();
 		
 		// If 1 < gcd(a,n) < n for some a <= r, output COMPOSITE
-		for( BigInteger i = BigInteger.valueOf(2); i.compareTo(r) <= 0; i = i.add(BigInteger.ONE) )
+		for( BigInteger i = BigInteger.valueOf(2); i.compareTo(r) <= 0; i = i.add(BigInteger.ONE) ) // for (i = 2; i <= r, i++)
 		{
-			BigInteger gcd = n.gcd(i);
+			BigInteger gcd = n.gcd(i); // gcd(n,i)
 			if (verbose) System.out.println("gcd(" + n + "," + i + ") = " + gcd);
-			if ( gcd.compareTo(BigInteger.ONE) > 0 && gcd.compareTo(n) < 0 )
+			if ( gcd.compareTo(BigInteger.ONE) > 0 && gcd.compareTo(n) < 0 ) // Si gcd(n,i) > 1 y gcd(n,i) < n, no es primo
 			{
 				factor = i;
 				n_isprime = false;
@@ -138,24 +141,30 @@ public class AKS extends Thread
 		
 		end_time = System.nanoTime();
 		time_result[2] = end_time - start_time;
+		start_time = System.nanoTime();
 
 		return time_result;
 		
-		// // If n <= r, output PRIME
-		// if( n.compareTo(r) <= 0 )
-		// {
-		// 	n_isprime = true;
-		// 	return true;
-		// }
+		// If n <= r, output PRIME
+		if( n.compareTo(r) <= 0 )
+		 {
+		 	n_isprime = true;
+		 	return true;
+		}
+
+		end_time = System.nanoTime();
+		time_result[3] = end_time - start_time;
+		start_time = System.nanoTime();
 
 		
 		// // For i = 1 to sqrt(totient)log(n) do
 		// // if (X+i)^n <>�X^n + i (mod X^r - 1,n), output composite;
 
 		// // sqrt(totient)log(n)
-		// int limit = (int) (Math.sqrt(totient(r).doubleValue()) * this.log());
+		// int limit = (int) (Math.sqrt(totient(r).doubleValue()) * this.log()); // Se hace la Euler's totient function de r (primos relativos a r en el set[1,r-1] de números naturales)
+																				 // Se calcula la raíz de lo anterior, se multiplica por el logaritmo de n y se pasa a entero
 		// // X^r - 1
-		// Poly modPoly = new Poly(BigInteger.ONE, r.intValue()).minus(new Poly(BigInteger.ONE,0));
+		// Poly modPoly = new Poly(BigInteger.ONE, r.intValue()).minus(new Poly(BigInteger.ONE,0)); //
 		// // X^n (mod X^r - 1, n)
 		// Poly partialOutcome = new Poly(BigInteger.ONE, 1).modPow(n, modPoly, n);
 		// for( int i = 1; i <= limit; i++ )
@@ -178,7 +187,9 @@ public class AKS extends Thread
 		// }
 		
 		// n_isprime = true;
-	    // return n_isprime;
+		end_time = System.nanoTime();
+		time_result[4] = end_time - start_time;
+	    return time_result;
 	}
 
 	
