@@ -15,6 +15,6 @@ def find_closest_prime(n):
             return i
         i += 1
 
-for i in range(100000000000000, 1000000000000000, 100000000000000//2):
+for i in range(100000000000000, 10000000000000000, 100000000000000):
     closest_prime = find_closest_prime(i)
     print(closest_prime)
